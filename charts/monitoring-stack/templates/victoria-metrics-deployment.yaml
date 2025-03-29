@@ -1,0 +1,15 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: victoria-metrics
+spec:
+  serviceName: victoria-metrics
+  replicas: 3
+  template:
+    spec:
+      containers:
+      - name: victoria-metrics
+        image: victoriametrics/victoria-metrics:v1.85.0
+        args:
+        - -retentionPeriod=30d
+        - -storageDataPath=/data

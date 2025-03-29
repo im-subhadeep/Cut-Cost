@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argo-cost-analysis-scripts
+data:
+  run_etl_pipeline.py: |
+    import subprocess
+
+    def run_etl_pipeline():
+        # Example pipeline steps (query -> analyze -> save)
+        subprocess.run(["python3", "query_metrics.py"])
+        subprocess.run(["python3", "advanced_cost_analysis.py"])
+
+    if __name__ == "__main__":
+        run_etl_pipeline()

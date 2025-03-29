@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: cost-analysis-pipeline
+spec:
+  entrypoint: main-pipeline
+  templates:
+  - name: main-pipeline
+    steps:
+    - - name: query-metrics-step
+        template: query-metrics-task
+      - name: analyze-cost-step
+        template: analyze-cost-task
+
+  - name: query-metrics-task
+    container:
+      image: python:3.9-slim
+      command: ["python3", "/scripts/query_metrics.py"]
+
+  - name: analyze-cost-task
+    container:
+      image: python:3.9-slim
+      command: ["python3", "/scripts/advanced_cost_analysis.py"]

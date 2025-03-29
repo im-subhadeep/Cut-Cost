@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-monitoring
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+      - name: prometheus
+        image: prom/prometheus:v2.40.0
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/prometheus
+      volumes:
+      - name: config-volume
+        configMap:
+          name: prometheus-config

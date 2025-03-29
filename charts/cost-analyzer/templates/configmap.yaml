@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: billing-integration
+data:
+  aws-integration.py: |
+    import boto3
+    def get_aws_billing():
+        client = boto3.client('ce')
+        return client.get_cost_and_usage(...)

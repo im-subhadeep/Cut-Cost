@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubecost
+spec:
+  template:
+    spec:
+      serviceAccountName: kubecost-sa
+      containers:
+      - name: cost-model
+        image: gcr.io/kubecost1/cost-model:v1.95.0
+        env:
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: cloud-credentials
+              key: aws-access-key

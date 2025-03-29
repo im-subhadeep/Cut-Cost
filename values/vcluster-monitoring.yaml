@@ -1,0 +1,5 @@
+monitoring-stack:
+  prometheus:
+    storageSize: 100Gi
+  victoria-metrics:
+    retentionDays: 45

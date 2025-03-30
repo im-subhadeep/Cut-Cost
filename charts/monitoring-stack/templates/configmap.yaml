@@ -1,43 +1,16 @@
-# extract-cost-data-cm.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: cost-extract-scripts
+  name: prometheus-query-scripts
 data:
-  aws_cost_extractor.py: |
-    import boto3
-    from datetime import datetime, timedelta
-    
-    def get_aws_cost_data():
-        client = boto3.client('ce')
-        return client.get_cost_and_usage(
-            TimePeriod={
-                'Start': (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%d'),
-                'End': datetime.now().strftime('%Y-%m-%d')
-            },
-            Granularity='HOURLY',
-            Metrics=['UnblendedCost']
-        )
+  query_metrics.py: |
+    import requests
 
-# extract-cost-data-cron.yaml
-apiVersion: batch/v1
-kind: CronJob
-metadata:
-  name: cost-data-extractor
-spec:
-  schedule: "0 */2 * * *"
-  jobTemplate:
-    spec:
-      template:
-        spec:
-          containers:
-          - name: extractor
-            image: python:3.9-slim
-            command: ["python", "/scripts/aws_cost_extractor.py"]
-            volumeMounts:
-            - name: scripts
-              mountPath: /scripts
-          volumes:
-          - name: scripts
-            configMap:
-              name: cost-extract-scripts
+    def query_prometheus(query):
+        url = "http://prometheus-server/api/v1/query"
+        response = requests.get(url, params={"query": query})
+        return response.json()
+
+    if __name__ == "__main__":
+        cpu_query = 'sum(rate(container_cpu_usage_seconds_total[5m]))'
+        print(query_prometheus(cpu_query))

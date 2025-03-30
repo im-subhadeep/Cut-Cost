@@ -1,32 +1,21 @@
-# transform-cost-data-cm.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: cost-transform-scripts
+  name: kubecost-scripts
 data:
-  cost_transformer.py: |
-    def normalize_cost_data(raw_data):
-        # Normalization logic using Pandas
-        df = process_kubecost_data(raw_data)
-        df['cost_per_cpu'] = df['cost'] / df['cpu_usage']
-        return df.to_json()
+  advanced_cost_analysis.py: |
+    import requests
 
-# kubecost-exporter-deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: kubecost-exporter
-spec:
-  template:
-    spec:
-      containers:
-      - name: exporter
-        image: python:3.9-slim
-        command: ["python", "/scripts/cost_transformer.py"]
-        volumeMounts:
-        - name: scripts
-          mountPath: /scripts
-      volumes:
-      - name: scripts
-        configMap:
-          name: cost-transform-scripts
+    def fetch_kubecost_data(api_url):
+        response = requests.get(api_url)
+        return response.json()
+
+    def calculate_optimized_cost(data):
+        total_cost = sum(item['cost'] for item in data)
+        optimized_cost = total_cost * 0.9  # Example optimization logic (10% savings)
+        return optimized_cost
+
+    if __name__ == "__main__":
+        api_url = "http://kubecost-cost-analyzer/api/v1/allocation"
+        data = fetch_kubecost_data(api_url)
+        print("Optimized Cost:", calculate_optimized_cost(data))

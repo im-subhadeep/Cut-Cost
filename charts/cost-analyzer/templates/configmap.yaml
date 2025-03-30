@@ -1,10 +1,32 @@
+# transform-cost-data-cm.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: billing-integration
+  name: cost-transform-scripts
 data:
-  aws-integration.py: |
-    import boto3
-    def get_aws_billing():
-        client = boto3.client('ce')
-        return client.get_cost_and_usage(...)
+  cost_transformer.py: |
+    def normalize_cost_data(raw_data):
+        # Normalization logic using Pandas
+        df = process_kubecost_data(raw_data)
+        df['cost_per_cpu'] = df['cost'] / df['cpu_usage']
+        return df.to_json()
+
+# kubecost-exporter-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubecost-exporter
+spec:
+  template:
+    spec:
+      containers:
+      - name: exporter
+        image: python:3.9-slim
+        command: ["python", "/scripts/cost_transformer.py"]
+        volumeMounts:
+        - name: scripts
+          mountPath: /scripts
+      volumes:
+      - name: scripts
+        configMap:
+          name: cost-transform-scripts

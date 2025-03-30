@@ -1,0 +1,25 @@
+# optimization-recommender-cm.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: optimization-scripts
+data:
+  recommender_engine.py: |
+    import pandas as pd
+    
+    def generate_recommendations():
+        df = get_resource_utilization()
+        # Recommendation logic
+        return df[df['cpu_usage'] < 30].apply(calculate_savings)
+
+# recommendation-workflow.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: cost-optimization
+spec:
+  schedule: "0 8 * * 1"
+  template:
+    container:
+      image: python:3.9-slim
+      command: [python, "/scripts/recommender_engine.py"]

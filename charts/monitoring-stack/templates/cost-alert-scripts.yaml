@@ -1,0 +1,29 @@
+# cost-alerting-cm.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cost-alert-scripts
+data:
+  anomaly_detector.py: |
+    from prometheus_api_client import PrometheusConnect
+    
+    def detect_anomalies():
+        pc = PrometheusConnect(url="http://victoria-metrics:8428")
+        current_cost = pc.custom_query('sum(aws_cost)')
+        # Anomaly detection logic
+        if current_cost > threshold:
+            trigger_alert()
+
+# alertmanager-config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alertmanager-config
+data:
+  alertmanager.yml: |
+    route:
+      receiver: 'cost-alerts'
+    receivers:
+    - name: 'cost-alerts'
+      webhook_configs:
+      - url: 'http://cost-alert-handler:5000/alerts'

@@ -1,23 +1,35 @@
+# cost-analysis-workflow.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   name: cost-analysis-pipeline
 spec:
-  entrypoint: main-pipeline
+  entrypoint: main
   templates:
-  - name: main-pipeline
-    steps:
-    - - name: query-metrics-step
-        template: query-metrics-task
-      - name: analyze-cost-step
-        template: analyze-cost-task
+  - name: main
+    dag:
+      tasks:
+      - name: extract
+        template: extract-task
+      - name: transform
+        dependencies: [extract]
+        template: transform-task
+      - name: load
+        dependencies: [transform]
+        template: load-task
 
-  - name: query-metrics-task
-    container:
+  - name: extract-task
+    script:
       image: python:3.9-slim
-      command: ["python3", "/scripts/query_metrics.py"]
+      command: [python]
+      source: |
+        from scripts.aws_cost_extractor import get_aws_cost_data
+        get_aws_cost_data()
 
-  - name: analyze-cost-task
-    container:
+  - name: transform-task
+    script:
       image: python:3.9-slim
-      command: ["python3", "/scripts/advanced_cost_analysis.py"]
+      command: [python] 
+      source: |
+        from scripts.cost_transformer import normalize_cost_data
+        normalize_cost_data(...)
